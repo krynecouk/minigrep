@@ -12,13 +12,7 @@ impl Search {
     }
 
     fn search<'a>(content: &'a str, predicate: &dyn Fn(&str) -> bool) -> Vec<&'a str> {
-        let mut result: Vec<&str> = Vec::new();
-        for line in content.lines() {
-            if predicate(line) {
-                result.push(line);
-            }
-        }
-        result
+        return content.lines().filter(|line| predicate(line)).collect();
     }
 }
 
