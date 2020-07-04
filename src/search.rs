@@ -12,7 +12,7 @@ impl Search {
     }
 
     fn search<'a>(content: &'a str, predicate: &dyn Fn(&str) -> bool) -> Vec<&'a str> {
-        return content.lines().filter(|line| predicate(line)).collect();
+        content.lines().filter(|line| predicate(line)).collect()
     }
 }
 
