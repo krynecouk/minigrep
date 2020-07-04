@@ -1,6 +1,6 @@
 mod search;
 
-use crate::search::Search;
+use search::Search;
 use std::{env, error::Error, fs};
 
 pub fn run(config: &Config) -> Result<(), Box<dyn Error>> {
@@ -19,12 +19,26 @@ pub fn run(config: &Config) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+/// Representation of parsed command line arguments.
 pub struct Config {
     query: String,
     filename: String,
     case_sensitive: bool,
 }
 
+/// Config methods and creators.
+///
+/// #Examples
+///
+/// ```
+/// let args: Vec<String> = vec![
+///     "minigrep".to_string(),
+///     "test query".to_string(),
+///     "~/dev/foo.txt".to_string(),
+/// ];
+/// let config = minigrep::Config::from(args.into_iter());
+/// assert!(config.is_ok());
+/// ```
 impl Config {
     pub fn from<T>(mut args: T) -> Result<Config, &'static str>
     where
