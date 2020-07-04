@@ -1,6 +1,6 @@
 mod search;
 
-use search::Search;
+use crate::search::Search;
 use std::{env, error::Error, fs};
 
 pub fn run(config: &Config) -> Result<(), Box<dyn Error>> {
@@ -26,12 +26,24 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn from(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() != 3 {
-            return Err("not enough arguments");
-        }
+    pub fn from<T>(mut args: T) -> Result<Config, &'static str>
+    where
+        T: Iterator<Item = String>,
+    {
+        args.next(); // name of program
+
+        let query = match args.next() {
+            Some(query) => query,
+            None => return Err("Missing query argument"),
+        };
+
+        let filename = match args.next() {
+            Some(filename) => filename,
+            None => return Err("Missing filename argument"),
+        };
+
         let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
-        Ok(Config::new(&args[1], &args[2], case_sensitive))
+        Ok(Config::new(&query, &filename, case_sensitive))
     }
 
     fn new(query: &str, filename: &str, case_sensitive: bool) -> Config {
@@ -50,11 +62,11 @@ mod tests {
     #[test]
     fn should_parse_args_into_config() {
         let args: Vec<String> = vec![
-            "_".to_string(),
+            "minigrep".to_string(),
             "test query".to_string(),
             "~/dev/foo.txt".to_string(),
         ];
-        let config = Config::from(&args);
+        let config = Config::from(args.into_iter());
         assert!(config.is_ok());
 
         let config = config.unwrap();
@@ -63,21 +75,18 @@ mod tests {
     }
 
     #[test]
-    fn should_not_parse_args_into_config_if_wrong_number_of_arguments() {
-        let args: Vec<String> = vec![
-            "_".to_string(),
-            "_".to_string(),
-            "_".to_string(),
-            "_".to_string(),
-        ];
-        let config = Config::from(&args);
+    fn should_not_parse_args_if_query_is_missing() {
+        let args: Vec<String> = vec!["minigrep".to_string()];
+        let config = Config::from(args.into_iter());
         assert!(config.is_err());
+        assert_eq!(config.err(), Some("Missing query argument"));
     }
 
     #[test]
-    fn should_not_parse_args_into_config_if_no_arguments() {
-        let args: Vec<String> = vec![];
-        let config = Config::from(&args);
+    fn should_not_parse_args_if_filename_is_missing() {
+        let args: Vec<String> = vec!["minigrep".to_string(), "test query".to_string()];
+        let config = Config::from(args.into_iter());
         assert!(config.is_err());
+        assert_eq!(config.err(), Some("Missing filename argument"));
     }
 }

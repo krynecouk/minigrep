@@ -3,8 +3,8 @@ use std::env;
 use std::process;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    let config = Config::from(&args).unwrap_or_else(|err| {
+    let args = env::args();
+    let config = Config::from(args).unwrap_or_else(|err| {
         eprintln!("Unable to parse config: {}", err);
         process::exit(1);
     });
