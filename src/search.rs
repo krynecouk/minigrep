@@ -2,16 +2,19 @@ pub struct Search {}
 
 impl Search {
     pub fn case_sensitive<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
-        Search::search(content, &|line: &str| line.contains(query))
+        Search::search(content, |line: &str| line.contains(query))
     }
 
     pub fn case_insensitive<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
-        Search::search(content, &|line: &str| {
+        Search::search(content, |line: &str| {
             line.to_lowercase().contains(&query.to_lowercase())
         })
     }
 
-    fn search<'a>(content: &'a str, predicate: &dyn Fn(&str) -> bool) -> Vec<&'a str> {
+    fn search<F>(content: &str, predicate: F) -> Vec<&str>
+    where
+        F: Fn(&str) -> bool,
+    {
         content.lines().filter(|line| predicate(line)).collect()
     }
 }
